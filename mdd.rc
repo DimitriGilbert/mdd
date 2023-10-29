@@ -1,0 +1,4 @@
+if [ "${MDD_DIR}" != "" ]; then
+  alias mdd="${MDD_DIR}/mdd";
+  [ -f "${MDD_DIR}/completely.bash" ] && source "${MDD_DIR}/completely.bash";
+fi
