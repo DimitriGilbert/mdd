@@ -13,8 +13,10 @@
 # @parseArger opt template "template file to use" --alias tpl
 # @parseArger opt headings "add headings to your file" --repeat --alias part --alias h2
 # @parseArger opt headings-level "heading level" --default-value "2" --alias hl
+# @parseArger opt filename "markdown file name" --default-value "index.md"
 # @parseArger flag draft "is it a draft" --on --no-alias publish
 # @parseArger flag force "erase if exists"
+# @parseArger flag is-category "this is a category, using _index.md as filename" --alias is-cat
 # @parseArger nested meta "add any meta you want"
 # @parseArger-declarations-end
 
@@ -54,9 +56,11 @@ _arg_summary=
 _arg_template=
 _arg_headings=()
 _arg_headings_level="2"
+_arg_filename="index.md"
 # FLAGS
 _arg_draft="on"
 _arg_force="off"
+_arg_is_category="off"
 # NESTED
 _arg_meta=
 declare -A _arg_ns_meta;
@@ -81,12 +85,15 @@ print_help()
 	echo -e "	--template|--tpl <template>: template file to use"
 	echo -e "	--headings|--part|--h2 <headings>: add headings to your file, repeatable"
 	echo -e "	--headings-level|--hl <headings-level>: heading level [default: ' 2 ']"
+	echo -e "	--filename <filename>: markdown file name [default: ' index.md ']"
 	echo -e "	--draft|--no-draft: is it a draft, on by default (use --no-draft to turn it off)
 		no-aliases: --publish,"
 	echo -e "	--force|--no-force: erase if exists"
+	echo -e "	--is-category|--no-is-category: this is a category, using _index.md as filename
+		aliases: --is-cat,"
 	echo -e "	--meta[-<key>] <meta-key-value>: nested, add any meta you want"
 	echo -e "Usage :
-	$0 <title> [--folder <value>] [--categories <value>] [--tags <value>] [--series <value>] [--date <value>] [--summary <value>] [--template <value>] [--headings <value>] [--headings-level <value>] [--[no-]draft] [--[no-]force] [--[no-]meta]";
+	$0 <title> [--folder <value>] [--categories <value>] [--tags <value>] [--series <value>] [--date <value>] [--summary <value>] [--template <value>] [--headings <value>] [--headings-level <value>] [--filename <value>] [--[no-]draft] [--[no-]force] [--[no-]is-category] [--[no-]meta]";
 	fi
 
 }
@@ -267,6 +274,15 @@ parse_commandline()
 				_arg_headings_level="${_key##--hl=}"
 				;;
 			
+			--filename)
+				test $# -lt 2 && die "Missing value for the option: '$_key'" 1
+				_arg_filename="$2"
+				shift
+				;;
+			--filename=*)
+				_arg_filename="${_key##--filename=}"
+				;;
+			
 			--draft)
 				_arg_draft="on"
 				;;
@@ -278,6 +294,12 @@ parse_commandline()
 				;;
 			--no-force)
 				_arg_force="off"
+				;;
+			--is-category|--is-cat)
+				_arg_is_category="on"
+				;;
+			--no-is-category)
+				_arg_is_category="off"
 				;;
 			--meta)
 				test $# -lt 2 && die "Missing value for the option: '$_key'" 1
@@ -380,8 +402,10 @@ print_debug()
 	echo -e "	template: ${_arg_template}";
 	echo -e "	headings: ${_arg_headings[*]}";
 	echo -e "	headings-level: ${_arg_headings_level}";
+	echo -e "	filename: ${_arg_filename}";
 	echo -e "	draft: ${_arg_draft}";
 	echo -e "	force: ${_arg_force}";
+	echo -e "	is-category: ${_arg_is_category}";
 	echo -e "	meta: ${_arg_meta}";
 	for _tmp_k_meta in "${!_arg_ns_meta[@]}"; do
 		echo -e "	meta-$_tmp_k_meta: ${_arg_ns_meta[$_tmp_k_meta]}";
@@ -453,7 +477,7 @@ if [ "${#_arg_tags[@]}" -gt 0  ]; then
 	_metas_str+="tags: \n";
 	for _tg in "${_arg_tags[@]}"; do
 		log "\t$_tg" 4;
-		_metas_str+="\t- $_tg\n";
+		_metas_str+="  - $_tg\n";
 	done
 fi
 
@@ -489,10 +513,14 @@ if [ "${#_arg_headings[@]}" -gt 0 ]; then
 	done
 fi
 
-if [ "$_arg_force" == "on" ] && [ -f "${_container_dir}/index.md" ]; then 
-  rm "${_container_dir}/index.md" -f; 
+if [ "$_arg_is_category" == "on" ] && [ "$_arg_filename" == "index.md" ]; then
+	_arg_filename="_index.md";
 fi
-if [ ! -f "${_container_dir}/index.md" ]; then
+
+if [ "$_arg_force" == "on" ] && [ -f "${_container_dir}/${_arg_filename}" ]; then 
+  rm "${_container_dir}/${_arg_filename}" -f; 
+fi
+if [ ! -f "${_container_dir}/${_arg_filename}" ]; then
 	if [ "$_arg_template" == "" ] || [ ! -f "$_arg_template" ]; then
 		if [ "$_arg_template" != "" ]; then
 			log "template $_arg_template not found" -1;
@@ -503,7 +531,7 @@ if [ ! -f "${_container_dir}/index.md" ]; then
 	sed \
 		-e "s/{{metas}}/$_metas_str/g" \
 		-e "s/{{content}}/$_contents_str/g" \
-		"$_arg_template" > "${_container_dir}/index.md";
+		"$_arg_template" > "${_container_dir}/${_arg_filename}";
 else
 	die "file already exists: ${_container_dir}";
 fi

@@ -1,6 +1,6 @@
 mdd:
-- article
-mdd article:
+- new
+mdd new:
 - --folder
 - --directory
 - --dir
@@ -29,8 +29,12 @@ mdd article:
 - --h2
 - --headings-level
 - --hl
+- --filename
 - --draft
 - --no-draft
 - --publish
 - --force
 - --no-force
+- --is-category
+- --no-is-category
+- --is-cat

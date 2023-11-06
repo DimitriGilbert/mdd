@@ -28,12 +28,12 @@ _mdd_completions() {
   local compline="${compwords[*]}"
 
   case "$compline" in
-    'article'*)
-      while read -r; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "$(_mdd_completions_filter "--folder --directory --dir --categories --cat --parent -c --tags --tag -t --series --group -g --date --publication --publish-at -d --summary --description --desc -s --template --tpl --headings --part --h2 --headings-level --hl --draft --no-draft --publish --force --no-force")" -- "$cur" )
+    'new'*)
+      while read -r; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "$(_mdd_completions_filter "--folder --directory --dir --categories --cat --parent -c --tags --tag -t --series --group -g --date --publication --publish-at -d --summary --description --desc -s --template --tpl --headings --part --h2 --headings-level --hl --filename --draft --no-draft --publish --force --no-force --is-category --no-is-category --is-cat")" -- "$cur" )
       ;;
 
     *)
-      while read -r; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "$(_mdd_completions_filter "article")" -- "$cur" )
+      while read -r; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "$(_mdd_completions_filter "new")" -- "$cur" )
       ;;
 
   esac
