@@ -462,6 +462,9 @@ fi
 
 _metas_str="title: $_arg_title\n";
 
+if [ "$_arg_date" == "" ]; then
+	_arg_date=$(date +%FT%T%:z);
+fi
 if [ "$_arg_date" != "" ]; then
 	log "date specified: $_arg_date" 4;
 	_metas_str+="date: $_arg_date\n";
